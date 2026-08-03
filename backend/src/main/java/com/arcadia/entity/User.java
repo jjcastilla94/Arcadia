@@ -19,6 +19,7 @@ import lombok.Setter;
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Entity
 @Table(name = "users")
@@ -71,6 +72,12 @@ public class User {
     @PreUpdate
     protected void onUpdate() {
         this.updatedAt = LocalDateTime.now();
+    }
+
+    public Set<Role> getRoles() {
+        return userRoles.stream()
+                .map(UserRole::getRole)
+                .collect(Collectors.toSet());
     }
 
     public void addRole(Role role) {
