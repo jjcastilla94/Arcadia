@@ -2,7 +2,7 @@
 -- ARCADIA · Esquema de Base de Datos (MySQL 8)
 -- Plataforma web Full-Stack de juegos en el navegador
 -- ============================================================
--- Ejecutar como: mysql -u root -p < db/schema.sql
+-- Ejecutar como: mysql -u arcadia -p < db/schema.sql
 -- ============================================================
 
 SET NAMES utf8mb4;
@@ -19,7 +19,7 @@ USE arcadia;
 -- Escalable: mañana se pueden añadir MODERATOR, EDITOR, TESTER...
 -- ------------------------------------------------------------
 CREATE TABLE roles (
-    id          INT UNSIGNED NOT NULL AUTO_INCREMENT,
+    id          BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
     name        VARCHAR(50)  NOT NULL,
     description VARCHAR(255),
     PRIMARY KEY (id),
@@ -47,7 +47,7 @@ CREATE TABLE users (
 -- Relación N:M entre usuarios y roles
 CREATE TABLE user_roles (
     user_id BIGINT UNSIGNED NOT NULL,
-    role_id INT UNSIGNED    NOT NULL,
+    role_id BIGINT UNSIGNED NOT NULL,
     PRIMARY KEY (user_id, role_id),
     CONSTRAINT fk_user_roles_user FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE,
     CONSTRAINT fk_user_roles_role FOREIGN KEY (role_id) REFERENCES roles (id) ON DELETE CASCADE
@@ -58,7 +58,7 @@ CREATE TABLE user_roles (
 -- Tabla (no ENUM): permite añadir Terror, Zombies... sin recompilar
 -- ------------------------------------------------------------
 CREATE TABLE categories (
-    id   INT UNSIGNED NOT NULL AUTO_INCREMENT,
+    id   BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
     name VARCHAR(50) NOT NULL,
     slug VARCHAR(50) NOT NULL,
     PRIMARY KEY (id),
@@ -79,7 +79,7 @@ CREATE TABLE games (
     version        VARCHAR(20)  NOT NULL DEFAULT '1.0', -- versión actual (ver game_versions)
     thumbnail_path VARCHAR(255),            -- miniatura en uploads/thumbnails/
     cover_url      VARCHAR(255),            -- portada (banner) principal
-    category_id    INT UNSIGNED,
+    category_id    BIGINT UNSIGNED,
     is_public      BOOLEAN NOT NULL DEFAULT FALSE, -- publicado en el catálogo
     is_hidden      BOOLEAN NOT NULL DEFAULT FALSE, -- oculto (soft delete)
     created_at     TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
