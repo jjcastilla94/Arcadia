@@ -34,6 +34,31 @@ El **administrador** es la única figura con permisos para subir, editar y publi
 
 ---
 
+## 🚀 Puesta en marcha (desarrollo)
+
+Prerrequisitos: [Docker Desktop](https://www.docker.com/products/docker-desktop/), JDK 21 y Node 20+.
+
+```bash
+# 1. Base de datos (MySQL 8.4 en Docker) — aplica db/schema.sql la primera vez
+cp .env.example .env   # opcional: ajusta credenciales aquí
+docker compose up -d
+
+# 2. Backend (Spring Boot) — http://localhost:8080
+cd backend
+./mvnw spring-boot:run
+
+# 3. Frontend (Vue 3 + Vite) — http://localhost:5173
+cd frontend
+npm install
+npm run dev
+```
+
+- **Swagger/OpenAPI:** http://localhost:8080/swagger-ui.html
+- **MySQL (DBeaver/Workbench):** host `localhost:3306`, BD `${MYSQL_DATABASE}`, usuario `${MYSQL_USER}` / contraseña `${MYSQL_PASSWORD}` (ver `.env`).
+- Detener la base de datos: `docker compose down` (los datos persisten en el volumen `arcadia_mysql_data`).
+
+---
+
 ## ✨ Funcionalidades Clave
 
 ### 👥 Módulo de Usuarios *(Estilo Steam)*

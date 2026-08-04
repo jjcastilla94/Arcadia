@@ -1,0 +1,21 @@
+# IDE
+.idea/
+*.iml
+.vscode/
+.DS_Store
+
+# Java / Maven
+backend/target/
+
+# Node / Vue
+frontend/node_modules/
+frontend/dist/
+
+# Variables de entorno locales
+.env
+
+# Ficheros subidos localmente
+uploads/
+
+# Logs
+*.log
