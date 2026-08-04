@@ -38,6 +38,12 @@ const routes = [
     component: () => import('../views/RegisterView.vue'),
     meta: { guestOnly: true }
   },
+  {
+    path: '/admin',
+    name: 'admin',
+    component: () => import('../views/AdminDashboard.vue'),
+    meta: { requiresAuth: true, requiresAdmin: true }
+  },
   { path: '/:pathMatch(.*)*', redirect: '/' }
 ]
 
@@ -53,6 +59,9 @@ router.beforeEach(async (to) => {
   }
   if (to.meta.requiresAuth && !auth.isAuthenticated) {
     return { name: 'login' }
+  }
+  if (to.meta.requiresAdmin && !auth.roleNames.includes('ROLE_ADMIN')) {
+    return { name: 'home' }
   }
   if (to.meta.guestOnly && auth.isAuthenticated) {
     return { name: 'home' }

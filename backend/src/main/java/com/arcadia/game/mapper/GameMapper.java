@@ -1,5 +1,6 @@
 package com.arcadia.game.mapper;
 
+import com.arcadia.admin.dto.response.AdminGameResponse;
 import com.arcadia.entity.Achievement;
 import com.arcadia.entity.Category;
 import com.arcadia.entity.Game;
@@ -21,6 +22,10 @@ import java.util.List;
 public interface GameMapper {
 
     GameSummaryResponse toSummary(Game game, long playCount);
+
+    @Mapping(target = "isPublic", source = "public")
+    @Mapping(target = "isHidden", source = "hidden")
+    AdminGameResponse toAdmin(Game game);
 
     @Mapping(target = "images", source = "gameImages")
     @Mapping(target = "versions", source = "gameVersions")

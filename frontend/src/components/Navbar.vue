@@ -17,6 +17,7 @@ function logout() {
     <nav class="nav-links">
       <router-link to="/">Inicio</router-link>
       <router-link to="/library">Biblioteca</router-link>
+      <router-link v-if="auth.roleNames.includes('ROLE_ADMIN')" to="/admin">Admin</router-link>
     </nav>
     <div class="nav-user">
       <span class="nickname">{{ auth.user?.nickname }}</span>

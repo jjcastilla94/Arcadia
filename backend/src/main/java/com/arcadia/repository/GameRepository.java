@@ -15,11 +15,11 @@ public interface GameRepository extends JpaRepository<Game, Long> {
     boolean existsBySlug(String slug);
 
     @Query("""
-            SELECT g FROM Game g
+            SELECT g FROM Game g LEFT JOIN g.category c
             WHERE g.isPublic = true
               AND g.isHidden = false
               AND (:search IS NULL OR LOWER(g.title) LIKE LOWER(CONCAT('%', :search, '%')))
-              AND (:categorySlug IS NULL OR g.category.slug = :categorySlug)
+              AND (:categorySlug IS NULL OR c.slug = :categorySlug)
             ORDER BY g.createdAt DESC
             """)
     List<Game> findCatalog(@Param("search") String search, @Param("categorySlug") String categorySlug);
