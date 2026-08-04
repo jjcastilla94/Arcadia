@@ -2,12 +2,15 @@
 import { onMounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import { fetchGame } from '../api/games'
+import { addToLibrary, isInLibrary, removeFromLibrary } from '../api/library'
 
 const route = useRoute()
 const game = ref(null)
 const loading = ref(true)
 const error = ref('')
 const notice = ref('')
+const inLibrary = ref(false)
+const libraryBusy = ref(false)
 
 function formatSize(bytes) {
   if (bytes == null) return '—'
@@ -32,9 +35,30 @@ function comingSoon(action) {
   notice.value = `«${action}» estará disponible en las próximas fases.`
 }
 
+async function toggleLibrary() {
+  libraryBusy.value = true
+  notice.value = ''
+  try {
+    if (inLibrary.value) {
+      await removeFromLibrary(game.value.id)
+      inLibrary.value = false
+      notice.value = 'Eliminado de tu biblioteca.'
+    } else {
+      await addToLibrary(game.value.id)
+      inLibrary.value = true
+      notice.value = 'Añadido a tu biblioteca.'
+    }
+  } catch {
+    notice.value = 'No se pudo actualizar tu biblioteca.'
+  } finally {
+    libraryBusy.value = false
+  }
+}
+
 onMounted(async () => {
   try {
     game.value = await fetchGame(route.params.slug)
+    inLibrary.value = await isInLibrary(game.value.id)
   } catch {
     error.value = 'No se encontró el juego.'
   } finally {
@@ -66,8 +90,14 @@ onMounted(async () => {
 
       <section class="details-actions">
         <button type="button" class="btn btn-primary btn-lg" @click="comingSoon('Jugar')">▶ Jugar</button>
-        <button type="button" class="btn btn-outline btn-lg" @click="comingSoon('Añadir a biblioteca')">
-          + Añadir a biblioteca
+        <button
+          type="button"
+          class="btn btn-lg"
+          :class="inLibrary ? 'btn-success' : 'btn-outline'"
+          :disabled="libraryBusy"
+          @click="toggleLibrary"
+        >
+          {{ inLibrary ? '✓ En tu biblioteca' : '+ Añadir a biblioteca' }}
         </button>
         <p v-if="notice" class="notice">{{ notice }}</p>
       </section>
