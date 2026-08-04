@@ -10,6 +10,7 @@ public record GameDetailsResponse(
         String description,
         String thumbnailPath,
         String coverUrl,
+        String filePath,
         String version,
         CategoryResponse category,
         LocalDateTime createdAt,

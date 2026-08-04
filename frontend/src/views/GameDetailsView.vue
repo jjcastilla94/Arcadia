@@ -1,10 +1,11 @@
 <script setup>
 import { onMounted, ref } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { fetchGame } from '../api/games'
 import { addToLibrary, isInLibrary, removeFromLibrary } from '../api/library'
 
 const route = useRoute()
+const router = useRouter()
 const game = ref(null)
 const loading = ref(true)
 const error = ref('')
@@ -31,8 +32,8 @@ function formatDuration(seconds) {
   return hours > 0 ? `${hours}h ${minutes}m` : `${minutes} min`
 }
 
-function comingSoon(action) {
-  notice.value = `«${action}» estará disponible en las próximas fases.`
+function play() {
+  router.push({ name: 'player', params: { slug: game.value.slug } })
 }
 
 async function toggleLibrary() {
@@ -89,7 +90,7 @@ onMounted(async () => {
       </section>
 
       <section class="details-actions">
-        <button type="button" class="btn btn-primary btn-lg" @click="comingSoon('Jugar')">▶ Jugar</button>
+        <button type="button" class="btn btn-primary btn-lg" @click="play">▶ Jugar</button>
         <button
           type="button"
           class="btn btn-lg"

@@ -15,6 +15,8 @@ public interface PlaySessionRepository extends JpaRepository<PlaySession, Long> 
 
     List<PlaySession> findByGameId(Long gameId);
 
+    Optional<PlaySession> findByIdAndUserId(Long id, Long userId);
+
     long countByGameId(Long gameId);
 
     @Query("SELECT COUNT(DISTINCT p.user.id) FROM PlaySession p WHERE p.game.id = :gameId")

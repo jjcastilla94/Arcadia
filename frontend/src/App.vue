@@ -4,7 +4,7 @@ import Navbar from './components/Navbar.vue'
 
 <template>
   <Navbar />
-  <main>
+  <main :class="{ fullwidth: $route.meta.fullWidth }">
     <router-view />
   </main>
 </template>

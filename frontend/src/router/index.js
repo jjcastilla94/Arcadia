@@ -27,6 +27,12 @@ const routes = [
     meta: { requiresAuth: true }
   },
   {
+    path: '/play/:slug',
+    name: 'player',
+    component: () => import('../views/PlayerView.vue'),
+    meta: { requiresAuth: true, fullWidth: true }
+  },
+  {
     path: '/register',
     name: 'register',
     component: () => import('../views/RegisterView.vue'),

@@ -1,0 +1,73 @@
+<script setup>
+import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
+import { fetchGame } from '../api/games'
+import FullscreenButton from '../components/player/FullscreenButton.vue'
+import GameFrame from '../components/player/GameFrame.vue'
+import GameSidebar from '../components/player/GameSidebar.vue'
+import { usePlayer } from '../composables/usePlayer'
+import { usePlayTimer } from '../composables/usePlayTimer'
+
+const route = useRoute()
+const router = useRouter()
+
+const game = ref(null)
+const loading = ref(true)
+const error = ref('')
+
+const timer = usePlayTimer()
+const player = usePlayer()
+
+const iframeSrc = computed(() =>
+  game.value ? game.value.filePath || `/uploads/games/${game.value.slug}/index.html` : ''
+)
+
+async function exit() {
+  await player.finish()
+  router.push({ name: 'game-details', params: { slug: game.value.slug } })
+}
+
+onMounted(async () => {
+  try {
+    game.value = await fetchGame(route.params.slug)
+    await player.begin(game.value.id)
+    timer.start()
+  } catch {
+    error.value = 'No se pudo cargar el juego.'
+  } finally {
+    loading.value = false
+  }
+  window.addEventListener('pagehide', player.beaconFinish)
+})
+
+onBeforeUnmount(() => {
+  window.removeEventListener('pagehide', player.beaconFinish)
+  player.finish()
+})
+</script>
+
+<template>
+  <div class="player-page">
+    <p v-if="loading" class="muted">Preparando el juego...</p>
+
+    <div v-else-if="error" class="details-error">
+      <p class="error">{{ error }}</p>
+      <router-link :to="`/games/${route.params.slug}`" class="btn btn-outline">Volver al detalle</router-link>
+    </div>
+
+    <template v-else>
+      <div class="player-main">
+        <FullscreenButton>
+          <GameFrame :src="iframeSrc" :title="game.title" />
+        </FullscreenButton>
+      </div>
+
+      <GameSidebar
+        :game="game"
+        :elapsed-seconds="timer.elapsedSeconds"
+        :session-error="player.sessionError"
+        @exit="exit"
+      />
+    </template>
+  </div>
+</template>
