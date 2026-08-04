@@ -72,6 +72,9 @@ public class GameService {
     public GameDetailsResponse getBySlug(String slug) {
         Game game = gameRepository.findBySlug(slug)
                 .orElseThrow(() -> new GameNotFoundException("Game not found: " + slug));
+        if (!game.isPublic() || game.isHidden()) {
+            throw new GameNotFoundException("Game not found: " + slug);
+        }
 
         List<GameImageResponse> images = gameImageRepository.findByGameIdOrderByPositionAsc(game.getId()).stream()
                 .map(gameMapper::toImage)

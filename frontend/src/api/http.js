@@ -11,6 +11,9 @@ http.interceptors.request.use(async (config) => {
   if (auth.accessToken) {
     config.headers.Authorization = `Bearer ${auth.accessToken}`
   }
+  if (config.data instanceof FormData) {
+    delete config.headers['Content-Type']
+  }
   return config
 })
 
