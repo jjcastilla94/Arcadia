@@ -23,9 +23,25 @@ public interface GameMapper {
 
     GameSummaryResponse toSummary(Game game, long playCount);
 
-    @Mapping(target = "isPublic", source = "public")
-    @Mapping(target = "isHidden", source = "hidden")
-    AdminGameResponse toAdmin(Game game);
+    default AdminGameResponse toAdmin(Game game) {
+        CategoryResponse category = game.getCategory() != null ? toCategory(game.getCategory()) : null;
+        return new AdminGameResponse(
+                game.getId(),
+                game.getTitle(),
+                game.getSlug(),
+                game.getDescription(),
+                game.getThumbnailPath(),
+                game.getCoverUrl(),
+                game.getFilePath(),
+                game.getVersion(),
+                game.getFileSize(),
+                category,
+                game.isPublic(),
+                game.isHidden(),
+                game.getCreatedAt(),
+                game.getUpdatedAt()
+        );
+    }
 
     @Mapping(target = "images", source = "gameImages")
     @Mapping(target = "versions", source = "gameVersions")
