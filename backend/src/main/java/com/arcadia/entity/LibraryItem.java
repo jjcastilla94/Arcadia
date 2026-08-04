@@ -14,6 +14,7 @@ import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 import lombok.AllArgsConstructor;
+import org.hibernate.annotations.ColumnDefault;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -45,6 +46,11 @@ public class LibraryItem {
 
     @Column(name = "added_at", nullable = false, updatable = false)
     private LocalDateTime addedAt;
+
+    @Column(name = "removed", nullable = false)
+    @ColumnDefault("false")
+    @Builder.Default
+    private boolean removed = false;
 
     @Column(name = "last_played_at")
     private LocalDateTime lastPlayedAt;

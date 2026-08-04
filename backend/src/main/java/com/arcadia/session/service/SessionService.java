@@ -72,7 +72,7 @@ public class SessionService {
     }
 
     private void updateLibraryTime(Long userId, Long gameId, long durationSeconds) {
-        Optional<LibraryItem> libraryItem = libraryItemRepository.findByUserIdAndGameId(userId, gameId);
+        Optional<LibraryItem> libraryItem = libraryItemRepository.findByUserIdAndGameIdAndRemovedFalse(userId, gameId);
         libraryItem.ifPresent(item -> {
             item.setTimePlayedSeconds(item.getTimePlayedSeconds() + durationSeconds);
             item.setLastPlayedAt(LocalDateTime.now());

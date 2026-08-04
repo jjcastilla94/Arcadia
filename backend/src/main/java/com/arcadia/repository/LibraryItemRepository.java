@@ -10,7 +10,9 @@ public interface LibraryItemRepository extends JpaRepository<LibraryItem, Long> 
 
     Optional<LibraryItem> findByUserIdAndGameId(Long userId, Long gameId);
 
-    boolean existsByUserIdAndGameId(Long userId, Long gameId);
+    Optional<LibraryItem> findByUserIdAndGameIdAndRemovedFalse(Long userId, Long gameId);
 
-    List<LibraryItem> findByUserIdOrderByAddedAtDesc(Long userId);
+    boolean existsByUserIdAndGameIdAndRemovedFalse(Long userId, Long gameId);
+
+    List<LibraryItem> findByUserIdAndRemovedFalseOrderByAddedAtDesc(Long userId);
 }
