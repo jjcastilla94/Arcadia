@@ -14,3 +14,8 @@ export async function fetchGames({ search, category } = {}) {
   })
   return data.data
 }
+
+export async function fetchGame(slug) {
+  const { data } = await http.get(`/api/games/${slug}`)
+  return data.data
+}

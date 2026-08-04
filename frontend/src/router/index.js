@@ -15,6 +15,12 @@ const routes = [
     meta: { guestOnly: true }
   },
   {
+    path: '/games/:slug',
+    name: 'game-details',
+    component: () => import('../views/GameDetailsView.vue'),
+    meta: { requiresAuth: true }
+  },
+  {
     path: '/register',
     name: 'register',
     component: () => import('../views/RegisterView.vue'),

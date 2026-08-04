@@ -5,7 +5,7 @@ defineProps({
 </script>
 
 <template>
-  <article class="game-card">
+  <router-link :to="`/games/${game.slug}`" class="game-card">
     <div class="game-thumb">
       <img v-if="game.thumbnailPath" :src="game.thumbnailPath" :alt="game.title" />
       <div v-else class="game-thumb-placeholder">🎮</div>
@@ -18,5 +18,5 @@ defineProps({
         <span class="game-version">v{{ game.version }}</span>
       </div>
     </div>
-  </article>
+  </router-link>
 </template>
