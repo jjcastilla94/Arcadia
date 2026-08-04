@@ -1,12 +1,12 @@
 import http from './http'
 
 export async function fetchCategories() {
-  const { data } = await http.get('/api/categories')
+  const { data } = await http.get('/categories')
   return data.data
 }
 
 export async function fetchGames({ search, category } = {}) {
-  const { data } = await http.get('/api/games', {
+  const { data } = await http.get('/games', {
     params: {
       search: search || undefined,
       category: category || undefined
@@ -16,6 +16,6 @@ export async function fetchGames({ search, category } = {}) {
 }
 
 export async function fetchGame(slug) {
-  const { data } = await http.get(`/api/games/${slug}`)
+  const { data } = await http.get(`/games/${slug}`)
   return data.data
 }

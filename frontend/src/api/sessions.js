@@ -1,11 +1,11 @@
-import http from './http'
+﻿import http from './http'
 
 export async function startSession(gameId) {
-  const { data } = await http.post('/api/play-sessions/start', { gameId })
+  const { data } = await http.post('/play-sessions/start', { gameId })
   return data.data
 }
 
 export async function endSession(sessionId) {
-  const { data } = await http.post('/api/play-sessions/end', { sessionId })
+  const { data } = await http.post('/play-sessions/end', { sessionId })
   return data.data
 }
