@@ -94,7 +94,7 @@ npm run dev
 ## 🗺️ Roadmap de Desarrollo
 
 ```text
-FASE 1  ➜  Proyecto base, JWT y Usuarios
+FASE 1  ✅  Proyecto base, JWT y Usuarios  *(completada)*
 FASE 2  ➜  Catálogo
 FASE 3  ➜  Subida de Juegos (Admin)
 FASE 4  ➜  Biblioteca
@@ -124,6 +124,15 @@ FASE 9  ➜  Despliegue
 - Estado global con Pinia (store de auth con el token del usuario).
 - Vistas base: registro, login y layout global con navbar y estado de sesión.
 - Guardas de navegación del router (redirect si el usuario no está autenticado).
+
+**✅ Estado: FASE 1 COMPLETADA**
+
+| Área | Implementado |
+| --- | --- |
+| **Backend** | Spring Boot, Spring Security, JWT + Refresh Tokens, Swagger/OpenAPI, DTOs + MapStruct, manejo global de excepciones, Spring Data JPA |
+| **Base de Datos** | MySQL 8.4 en Docker, 17 tablas, seed inicial (roles y categorías) |
+| **Frontend** | Vue 3, Vite, Pinia, Vue Router, Axios, Login, Registro, Navbar, persistencia de sesión |
+| **Integración** | Login real, Registro real, `GET /api/users/me`, proxy de Vite `/api → :8080`, comunicación completa Frontend ↔ Backend |
 
 ### 🎮 FASE 2: Catálogo
 
