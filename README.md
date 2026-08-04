@@ -248,27 +248,23 @@ Internamente usa `window.postMessage`, pero para el desarrollador del juego la i
 
 ![Arquitectura](docs/architecture.png)
 
-Organización por módulos de negocio, con capas `controller → service → repository` dentro de cada uno:
+Organización por módulos de negocio, con capas `controller → service → repository` dentro de cada uno (detalle en [`docs/architecture.md`](docs/architecture.md)):
 
 ```text
 backend
 │
-├── config          # Configuraciones (Security, WebMvc, CORS)
-├── security        # JwtTokenProvider, JwtAuthenticationFilter
-├── auth            # Registro, login, refresh tokens, tokens de verificación
-├── user            # Perfiles y roles
-├── game            # Catálogo y versiones (game_versions)
-├── category        # Categorías
-├── library         # Biblioteca personal (estado y valoración)
-├── achievement     # Logros (points, hidden) y desbloqueos
-├── review          # Reseñas con rating
-├── favorite        # Favoritos
-├── session         # Sesiones de juego y estadísticas
-├── storage         # StorageService y subida de .zip
-├── sdk             # Protocolo postMessage para los juegos
-├── common          # Utilidades y mappers
-└── exception       # Manejo global de excepciones (@RestControllerAdvice)
+├── auth            # Registro, login, refresh tokens (AuthController, AuthService)
+├── user            # Perfil autenticado (GET /api/users/me)
+├── security        # SecurityConfig, JwtService, JwtAuthenticationFilter, CustomUserDetails
+├── config          # CorsConfig, OpenApiConfig (Swagger)
+├── common          # ApiResponse, GlobalExceptionHandler, excepciones y utilidades
+├── entity          # Entidades JPA (@Entity User, Role, Game, ...)
+└── repository      # Repositorios Spring Data JPA
 ```
+
+> Los módulos de `game`, `category`, `library`, `achievement`, `review`, `favorite`, `session`, `storage` y `sdk` se incorporarán en las fases 2-8 del roadmap.
+
+Diagrama entidad-relación de la base de datos: [`docs/arcadia_entidad_relacion.png`](docs/arcadia_entidad_relacion.png).
 
 Y dentro de cada módulo:
 
