@@ -42,7 +42,7 @@ public class SessionService {
 
     @Transactional
     public PlaySessionResponse start(User principal, Long gameId) {
-        Game game = gameRepository.findById(gameId)
+        Game game = gameRepository.findPublishedById(gameId)
                 .orElseThrow(() -> new GameNotFoundException("Game not found: " + gameId));
         PlaySession session = PlaySession.builder()
                 .user(userRepository.getReferenceById(principal.getId()))

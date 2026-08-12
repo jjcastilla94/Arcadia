@@ -1,4 +1,5 @@
 import { ref } from 'vue'
+import { useAuthStore } from '../stores/auth'
 import { endSession, startSession } from '../api/sessions'
 
 export function usePlayer() {
@@ -31,8 +32,17 @@ export function usePlayer() {
     const id = sessionId.value
     if (!id || !sessionActive.value) return
     sessionActive.value = false
-    const body = new Blob([JSON.stringify({ sessionId: id })], { type: 'application/json' })
-    navigator.sendBeacon('/api/play-sessions/end', body)
+    const token = useAuthStore().accessToken
+    if (!token) return
+    fetch('/api/play-sessions/end', {
+      method: 'POST',
+      keepalive: true,
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ sessionId: id })
+    }).catch(() => {})
   }
 
   return { sessionId, sessionActive, sessionError, begin, finish, beaconFinish }

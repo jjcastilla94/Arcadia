@@ -15,6 +15,14 @@ public interface GameRepository extends JpaRepository<Game, Long> {
     boolean existsBySlug(String slug);
 
     @Query("""
+            SELECT g FROM Game g
+            WHERE g.id = :id
+              AND g.isPublic = true
+              AND g.isHidden = false
+            """)
+    Optional<Game> findPublishedById(@Param("id") Long id);
+
+    @Query("""
             SELECT g FROM Game g LEFT JOIN g.category c
             WHERE g.isPublic = true
               AND g.isHidden = false

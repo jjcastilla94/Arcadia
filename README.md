@@ -96,7 +96,7 @@ npm run dev
 ```text
 FASE 1  ✅  Proyecto base, JWT y Usuarios  *(completada)*
 FASE 2  ✅  Catálogo, Admin, Biblioteca y Perfil  *(completada)*
-FASE 3  ➜  Player y Sesiones de Juego
+FASE 3  ✅  Player y Sesiones de Juego  *(completada)*
 FASE 4  ➜  Cloud Save + Arcadia.js
 FASE 5  ➜  Sistema de Logros
 FASE 6  ➜  Favoritos y Reseñas
@@ -169,6 +169,17 @@ FASE 9  ➜  Despliegue y Producción
 - **PlayerView** en `/games/:slug/play`: `<iframe>` con el `index.html` del juego, botón **Jugar** real, pantalla completa (Fullscreen API), volver al detalle y estados de loading/error.
 - Panel lateral: info del juego, capturas, reseñas, logros disponibles/completados y controles.
 - **Integración con la biblioteca:** jugados recientemente y estadísticas del juego derivadas de `play_sessions`.
+
+**✅ Estado: FASE 3 COMPLETADA**
+
+| Área | Implementado |
+| --- | --- |
+| **Player** | `PlayerView.vue` en `/play/:slug`: iframe HTML5 con sandbox, loading/error, pantalla completa (Fullscreen API), volver al detalle y botón **Jugar** desde Game Details |
+| **Sesiones** | `POST /api/play-sessions/start` y `/end`: inicio, `ended_at`, `duration_seconds`, cierre idempotente y ownership por usuario (sesión ajena → 404) |
+| **Biblioteca** | Actualización de `time_played_seconds` y `last_played_at` al terminar la sesión (si el juego está en la biblioteca) |
+| **Cierre robusto** | `fetch` con `keepalive` + `Authorization` en `pagehide` para cerrar la sesión al hacer F5 o cerrar la pestaña |
+| **Seguridad** | `start` solo para juegos publicados y no ocultos (404 si no); anónimo → 401; token inválido → 401 |
+| **Validación** | 12 pruebas de Player/sesiones pasadas contra el stack real + test de integración `SessionFlowIntegrationTest` |
 
 ### ☁️ FASE 4: Cloud Save + Arcadia.js
 
