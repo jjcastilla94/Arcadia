@@ -95,7 +95,7 @@ npm run dev
 
 ```text
 FASE 1  ✅  Proyecto base, JWT y Usuarios  *(completada)*
-FASE 2  ➜  Catálogo
+FASE 2  ✅  Catálogo  *(completada)*
 FASE 3  ➜  Subida de Juegos (Admin)
 FASE 4  ➜  Biblioteca
 FASE 5  ➜  Reproductor (Player)
@@ -144,6 +144,16 @@ FASE 9  ➜  Despliegue
 
 **Frontend (Vue 3 + Vite)**
 - **Home estilo Friv:** cuadrícula con tarjetas, búsqueda en tiempo real y filtros por género.
+
+**✅ Estado: FASE 2 COMPLETADA**
+
+| Área | Implementado |
+| --- | --- |
+| **Catálogo** | `GET /api/games` público con búsqueda por nombre y filtro por categoría; solo aparecen juegos publicados (borradores y ocultos dan 404) |
+| **Game Details** | `GET /api/games/{slug}` con portada, galería de capturas, historial de versiones, logros (incluidos los secretos) y estadísticas derivadas de `play_sessions` |
+| **Admin** | `GET/POST/PUT/DELETE /api/admin/games` con `ROLE_ADMIN`: subida de ZIP, edición, publicar/ocultar, nuevas versiones y borrado (BD + ficheros) |
+| **Biblioteca** | `GET/POST/DELETE /api/library` con soft-delete: añadir/quitar, estado, valoración y persistencia de stats al re-añadir |
+| **Permisos** | Admin solo para `ROLE_ADMIN` (403 a usuarios), biblioteca autenticada (401 anónimo); guardas en el router de Vue |
 
 ### 🛠️ FASE 3: Subida de Juegos *(Lado Admin)*
 
