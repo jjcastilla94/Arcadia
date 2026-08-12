@@ -153,6 +153,7 @@ FASE 9  ➜  Despliegue
 | **Game Details** | `GET /api/games/{slug}` con portada, galería de capturas, historial de versiones, logros (incluidos los secretos) y estadísticas derivadas de `play_sessions` |
 | **Admin** | `GET/POST/PUT/DELETE /api/admin/games` con `ROLE_ADMIN`: subida de ZIP, edición, publicar/ocultar, nuevas versiones y borrado (BD + ficheros) |
 | **Biblioteca** | `GET/POST/DELETE /api/library` con soft-delete: añadir/quitar, estado, valoración y persistencia de stats al re-añadir |
+| **Perfil** | `GET/PUT /api/users/me` y `PUT /api/users/me/password`: editar nickname/avatar, cambiar contraseña (BCrypt) con comprobación de unicidad y validación; vista `/profile` en el frontend |
 | **Permisos** | Admin solo para `ROLE_ADMIN` (403 a usuarios), biblioteca autenticada (401 anónimo); guardas en el router de Vue |
 
 ### 🛠️ FASE 3: Subida de Juegos *(Lado Admin)*
