@@ -95,14 +95,14 @@ npm run dev
 
 ```text
 FASE 1  ✅  Proyecto base, JWT y Usuarios  *(completada)*
-FASE 2  ✅  Catálogo  *(completada)*
-FASE 3  ➜  Subida de Juegos (Admin)
-FASE 4  ➜  Biblioteca
-FASE 5  ➜  Reproductor (Player)
-FASE 6  ➜  Cloud Save
-FASE 7  ➜  Logros
-FASE 8  ➜  Perfil y Pulido
-FASE 9  ➜  Despliegue
+FASE 2  ✅  Catálogo, Admin, Biblioteca y Perfil  *(completada)*
+FASE 3  ➜  Player y Sesiones de Juego
+FASE 4  ➜  Cloud Save + Arcadia.js
+FASE 5  ➜  Sistema de Logros
+FASE 6  ➜  Favoritos y Reseñas
+FASE 7  ➜  Perfil avanzado y Pulido
+FASE 8  ➜  Seguridad, Testing y Optimización
+FASE 9  ➜  Despliegue y Producción
 ```
 
 > El orden está pensado para tener **siempre algo funcionando** de principio a fin.
@@ -134,9 +134,9 @@ FASE 9  ➜  Despliegue
 | **Frontend** | Vue 3, Vite, Pinia, Vue Router, Axios, Login, Registro, Navbar, persistencia de sesión |
 | **Integración** | Login real, Registro real, `GET /api/users/me`, proxy de Vite `/api → :8080`, comunicación completa Frontend ↔ Backend |
 
-### 🎮 FASE 2: Catálogo
+### 🎮 FASE 2: Catálogo, Admin, Biblioteca y Perfil
 
-> **Objetivo:** que el catálogo público muestre los juegos en una cuadrícula estilo Friv.
+> **Objetivo:** que el catálogo público muestre los juegos en una cuadrícula estilo Friv y que el administrador pueda subir y gestionar juegos mientras el usuario construye su biblioteca y perfil.
 
 **Backend (Spring Boot)**
 - Endpoint público `GET /api/games` (título, miniatura, portada, categoría y contador de partidas derivado de `play_sessions`).
@@ -156,53 +156,23 @@ FASE 9  ➜  Despliegue
 | **Perfil** | `GET/PUT /api/users/me` y `PUT /api/users/me/password`: editar nickname/avatar, cambiar contraseña (BCrypt) con comprobación de unicidad y validación; vista `/profile` en el frontend |
 | **Permisos** | Admin solo para `ROLE_ADMIN` (403 a usuarios), biblioteca autenticada (401 anónimo); guardas en el router de Vue |
 
-### 🛠️ FASE 3: Subida de Juegos *(Lado Admin)*
-
-> **Objetivo:** permitir al administrador subir `.zip` con juegos HTML5, descomprimirlos y gestionarlos.
-
-**Backend (Spring Boot)**
-- Entidad `Game`: título, descripción, `file_path`, `file_size`, `version` (actual), miniatura, portada, categoría y fecha.
-- Historial de versiones: tabla `game_versions` (versión, `file_path`, `release_notes`, fecha de subida) para volver a versiones anteriores y mostrar notas de actualización.
-- `StorageService`: recibe `.zip` vía `MultipartFile`, lo descomprime en `uploads/games/{game-slug}/`, valida que exista `index.html` y guarda la miniatura en `uploads/thumbnails/`.
-- `WebMvcConfigurer` para servir la carpeta `uploads/` como recurso estático.
-- Endpoints: `POST /api/admin/games` (requiere `ROLE_ADMIN`), `PUT/DELETE` para editar, ocultar y publicar.
-- Galería de capturas: tabla `game_images` (portada + capturas estilo Steam).
-
-**Frontend (Vue 3 + Vite)**
-- **AdminDashboard:** formulario de subida (texto, categoría, `.zip`, miniatura y capturas) y gestión de juegos.
-
-### 📚 FASE 4: Biblioteca
-
-> **Objetivo:** biblioteca personal estilo Steam.
-
-**Backend (Spring Boot)**
-- Entidad `LibraryItem` (relaciona `User` + `Game` con `added_at`, `last_played_at`, `time_played_seconds`, `status` y `rating`).
-- Endpoints:
-  - `POST /api/library/add/{gameId}`
-  - `DELETE /api/library/remove/{gameId}`
-  - `GET /api/library/my-games`
-  - `PUT /api/library/{gameId}/status` y `PUT /api/library/{gameId}/rating`
-
-**Frontend (Vue 3 + Vite)**
-- **LibraryView:** vista de lista/mosaico con opciones de estado (En curso / Completado / Abandonado), valoración 1-5 y orden por último jugado.
-- **Favoritos:** tabla `favorites` independiente de la biblioteca.
-
-### 🕹️ FASE 5: Reproductor *(Player)*
+### 🕹️ FASE 3: Player y Sesiones de Juego
 
 > **Objetivo:** que cualquier usuario pueda entrar a un juego y jugarlo dentro de la web.
 
 **Backend (Spring Boot)**
-- Registro de sesiones de juego en `play_sessions` (start, end, duración) para estadísticas y ranking de "Más jugados" (consultas agregadas, sin contador duplicado).
+- Registro de sesiones de juego en `play_sessions` (inicio, fin, duración) como fuente de verdad para el ranking de "Más jugados" y las estadísticas (consultas agregadas, sin contador duplicado): `POST /api/play-sessions/start` y `POST /api/play-sessions/end`.
+- Al jugar, actualizar `last_played_at` y `time_played_seconds` en la biblioteca del usuario.
+- Seguridad del reproductor: solo accesible para juegos publicados (borradores y ocultos dan 404), validación del juego y control de sesiones.
 
 **Frontend (Vue 3 + Vite)**
-- **GameView:** `<iframe src="http://localhost:8080/games/nombre-juego/index.html">`.
-- Botón de pantalla completa (Fullscreen API).
-- Panel lateral: info del juego, capturas, reseñas y logros.
-- Botones **"Añadir a mi Biblioteca"** y **"Favorito"**.
+- **PlayerView** en `/games/:slug/play`: `<iframe>` con el `index.html` del juego, botón **Jugar** real, pantalla completa (Fullscreen API), volver al detalle y estados de loading/error.
+- Panel lateral: info del juego, capturas, reseñas, logros disponibles/completados y controles.
+- **Integración con la biblioteca:** jugados recientemente y estadísticas del juego derivadas de `play_sessions`.
 
-### ☁️ FASE 6: Cloud Save
+### ☁️ FASE 4: Cloud Save + Arcadia.js
 
-> **Objetivo:** conectar el iframe con la app para guardar partidas automáticamente.
+> **Objetivo:** conectar el iframe con la app para guardar partidas automáticamente y formalizar el SDK para juegos.
 
 **Intercomunicación Juego ➔ Web (JavaScript `window.postMessage`)**
 - Evento `SAVE_DATA`: guardar progreso.
@@ -214,10 +184,17 @@ FASE 9  ➜  Despliegue
   - `POST /api/progress/save`
   - `GET /api/progress/{gameId}`
 
-**Frontend (Vue 3 + Vite)**
-- Escuchador de eventos `window.addEventListener('message', ...)` en el reproductor.
+**SDK Arcadia.js**
+- Librería JavaScript para que los juegos se integren sin conocer el protocolo interno:
+  - `Arcadia.save(data)` → `SAVE_DATA`
+  - `Arcadia.getSave()` → `LOAD_DATA`
+  - `Arcadia.unlock(id)` → logros (FASE 5)
+  - `Arcadia.getUser()` → usuario autenticado
 
-### 🏆 FASE 7: Logros
+**Frontend (Vue 3 + Vite)**
+- Escuchador de eventos `window.addEventListener('message', ...)` en el reproductor, con validación de origen y estructura.
+
+### 🏆 FASE 5: Sistema de Logros
 
 > **Objetivo:** sistema de logros con puntos y logros secretos.
 
@@ -228,23 +205,51 @@ FASE 9  ➜  Despliegue
   - `GET /api/achievements/game/{gameId}`
 
 **Frontend (Vue 3 + Vite)**
-- Notificación popup de logro desbloqueado (estilo Steam Toast).
+- Notificación popup de logro desbloqueado (estilo Steam Toast) al recibir `Arcadia.unlock(...)` en el reproductor.
 - Sección de logros en el perfil del usuario (ocultando los secretos sin desbloquear).
 
-### 🎨 FASE 8: Perfil y Pulido
+### ❤️ FASE 6: Favoritos y Reseñas
 
-> **Objetivo:** dar el estilo visual definitivo y la UX profesional.
+> **Objetivo:** favoritos independientes de la biblioteca y reseñas (rating + comentario) por juego.
 
-- **Perfil de usuario:** avatar y estadísticas reales (juegos jugados, horas jugadas, tiempo medio, sesión más larga, total de logros).
-- **Reseñas:** `POST /api/reviews` (rating + comentario) por juego.
-- **UI/UX:** loaders/skeletons, modales de confirmación y alertas de error estilizadas.
-- **Arquitectura limpia:** DTOs, servicios, mappers, validaciones, manejo de excepciones y documentación con Swagger/OpenAPI.
+**Backend (Spring Boot)**
+- Favoritos (tabla `favorites`):
+  - `POST /api/favorites/{gameId}`
+  - `DELETE /api/favorites/{gameId}`
+  - `GET /api/favorites`
+- Reseñas (tabla `reviews`):
+  - `POST /api/reviews`
+  - `PUT /api/reviews/{id}`
+  - `DELETE /api/reviews/{id}`
+  - `GET /api/games/{slug}/reviews`
 
-### 🚀 FASE 9: Despliegue
+**Frontend (Vue 3 + Vite)**
+- Botones de **Favorito** en Game Details y Player.
+- Listado y creación de reseñas en Game Details.
 
-- **Docker Compose:** backend + MySQL para levantar todo el entorno.
-- **Backend + BD:** VPS, Railway o Render.
-- **Frontend:** Vercel, Netlify o servido junto con Spring Boot.
+### 🎨 FASE 7: Perfil avanzado y Pulido
+
+> **Objetivo:** dar el estilo visual definitivo y la UX profesional con estadísticas reales del usuario.
+
+- **Perfil de usuario:** avatar y estadísticas reales (juegos jugados, horas jugadas, tiempo medio, sesión más larga, total de logros) calculadas a partir de `play_sessions`, `achievements` y `user_achievements`.
+- **UI/UX:** skeletons/loaders, animaciones, responsive, modales de confirmación, errores estilizados y accesibilidad básica.
+
+### 🛡️ FASE 8: Seguridad, Testing y Optimización
+
+> **Objetivo:** dejar la aplicación lista para producción.
+
+- **Backend:** tests unitarios, de integración y de seguridad; validación de permisos; rate limiting si procede; CORS definitivo; gestión de errores; validación de archivos ZIP; protección de `postMessage` y revisión de endpoints.
+- **Frontend:** rutas protegidas, manejo global de errores, expiración/refresh de JWT, estados de loading, errores de red y build de producción.
+- **Rendimiento:** consultas SQL e índices, paginación, optimización de imágenes, tamaños de ZIP y almacenamiento.
+
+### 🚀 FASE 9: Despliegue y Producción
+
+> **Objetivo:** llevar Arcadia a producción con CI/CD sobre AWS.
+
+- **Desarrollo:** el entorno Docker + MySQL + Spring Boot + Vue actual es la base que se llevará a producción.
+- **CI/CD:** GitHub Actions construye la imagen Docker del backend y el build del frontend.
+- **Backend + BD:** imagen Docker en AWS ECR y despliegue en AWS EC2 con Docker Compose (Spring Boot + MySQL).
+- **Frontend:** Vercel.
 - **Producción:** variables de entorno, HTTPS y rotación de refresh tokens.
 
 ---
@@ -273,8 +278,13 @@ Organización por módulos de negocio, con capas `controller → service → rep
 ```text
 backend
 │
+├── admin           # Gestión admin de juegos (AdminGameController, subida de ZIP)
 ├── auth            # Registro, login, refresh tokens (AuthController, AuthService)
-├── user            # Perfil autenticado (GET /api/users/me)
+├── user            # Perfil autenticado (GET/PUT /api/users/me)
+├── game            # Catálogo público y detalle (GET /api/games, GET /api/games/{slug})
+├── library         # Biblioteca personal (GET/POST/DELETE /api/library)
+├── session         # Sesiones de juego (POST /api/play-sessions/start|end)
+├── storage         # StorageService: descompresión de ZIP y servir uploads/
 ├── security        # SecurityConfig, JwtService, JwtAuthenticationFilter, CustomUserDetails
 ├── config          # CorsConfig, OpenApiConfig (Swagger)
 ├── common          # ApiResponse, GlobalExceptionHandler, excepciones y utilidades
@@ -282,7 +292,7 @@ backend
 └── repository      # Repositorios Spring Data JPA
 ```
 
-> Los módulos de `game`, `category`, `library`, `achievement`, `review`, `favorite`, `session`, `storage` y `sdk` se incorporarán en las fases 2-8 del roadmap.
+> Los módulos de `admin`, `game`, `category`, `library`, `session`, `storage` y `user` ya están incorporados (fases 1-2). Los módulos de `achievement`, `review`, `favorite` y `sdk` se incorporarán en las fases 4-6 del roadmap.
 
 Diagrama entidad-relación de la base de datos: [`docs/arcadia_entidad_relacion.png`](docs/arcadia_entidad_relacion.png).
 
