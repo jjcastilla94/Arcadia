@@ -40,7 +40,7 @@ public class SecurityConfig {
                         .accessDeniedHandler(accessDeniedHandler))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/**", "/api/games/**", "/api/categories/**",
-                                "/uploads/**", "/api-docs/**", "/swagger-ui/**", "/swagger-ui.html", "/error")
+                                "/uploads/**", "/arcadia.js", "/api-docs/**", "/swagger-ui/**", "/swagger-ui.html", "/error")
                         .permitAll()
                         .anyRequest().authenticated())
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
