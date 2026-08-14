@@ -5,8 +5,7 @@ const routes = [
   {
     path: '/',
     name: 'home',
-    component: () => import('../views/HomeView.vue'),
-    meta: { requiresAuth: true }
+    component: () => import('../views/HomeView.vue')
   },
   {
     path: '/login',
@@ -29,8 +28,7 @@ const routes = [
   {
     path: '/games/:slug',
     name: 'game-details',
-    component: () => import('../views/GameDetailsView.vue'),
-    meta: { requiresAuth: true }
+    component: () => import('../views/GameDetailsView.vue')
   },
   {
     path: '/play/:slug',
@@ -64,7 +62,7 @@ router.beforeEach(async (to) => {
     await auth.initialize()
   }
   if (to.meta.requiresAuth && !auth.isAuthenticated) {
-    return { name: 'login' }
+    return { name: 'login', query: { redirect: to.fullPath } }
   }
   if (to.meta.requiresAdmin && !auth.roleNames.includes('ROLE_ADMIN')) {
     return { name: 'home' }

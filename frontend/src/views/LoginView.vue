@@ -1,15 +1,21 @@
 <script setup>
 import { ref } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
 
 const auth = useAuthStore()
+const route = useRoute()
 const router = useRouter()
 
 const identifier = ref('')
 const password = ref('')
 const error = ref('')
 const loading = ref(false)
+
+const redirectPath =
+  typeof route.query.redirect === 'string' && route.query.redirect.startsWith('/')
+    ? route.query.redirect
+    : null
 
 function extractError(e) {
   const data = e.response?.data
@@ -23,7 +29,7 @@ async function submit() {
   loading.value = true
   try {
     await auth.login({ identifier: identifier.value.trim(), password: password.value })
-    router.push({ name: 'home' })
+    router.push(redirectPath || { name: 'home' })
   } catch (e) {
     error.value = extractError(e)
   } finally {

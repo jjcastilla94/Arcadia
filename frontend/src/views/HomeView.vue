@@ -55,7 +55,10 @@ onMounted(async () => {
 
 <template>
   <div class="home catalog">
-    <h1>Hola, {{ auth.user?.nickname }} 👋</h1>
+    <h1>
+      <template v-if="auth.isAuthenticated">Hola, {{ auth.user?.nickname }} 👋</template>
+      <template v-else>Bienvenido a Arcadia 🎮</template>
+    </h1>
     <p class="subtitle">Elige un juego y juega al instante.</p>
 
     <div class="catalog-toolbar">

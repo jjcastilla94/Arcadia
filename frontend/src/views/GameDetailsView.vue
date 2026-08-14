@@ -3,9 +3,11 @@ import { onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { fetchGame } from '../api/games'
 import { addToLibrary, isInLibrary, removeFromLibrary } from '../api/library'
+import { useAuthStore } from '../stores/auth'
 
 const route = useRoute()
 const router = useRouter()
+const auth = useAuthStore()
 const game = ref(null)
 const loading = ref(true)
 const error = ref('')
@@ -33,10 +35,18 @@ function formatDuration(seconds) {
 }
 
 function play() {
+  if (!auth.isAuthenticated) {
+    router.push({ name: 'login', query: { redirect: `/play/${game.value.slug}` } })
+    return
+  }
   router.push({ name: 'player', params: { slug: game.value.slug } })
 }
 
 async function toggleLibrary() {
+  if (!auth.isAuthenticated) {
+    router.push({ name: 'login', query: { redirect: route.fullPath } })
+    return
+  }
   libraryBusy.value = true
   notice.value = ''
   try {
@@ -59,7 +69,9 @@ async function toggleLibrary() {
 onMounted(async () => {
   try {
     game.value = await fetchGame(route.params.slug)
-    inLibrary.value = await isInLibrary(game.value.id)
+    if (auth.isAuthenticated) {
+      inLibrary.value = await isInLibrary(game.value.id)
+    }
   } catch {
     error.value = 'No se encontró el juego.'
   } finally {
