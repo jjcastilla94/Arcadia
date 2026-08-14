@@ -7,6 +7,9 @@ defineProps({
 })
 
 const loading = ref(true)
+const iframeEl = ref(null)
+
+defineExpose({ iframeEl })
 
 function onLoad() {
   loading.value = false
@@ -20,6 +23,7 @@ function onLoad() {
       <p>Cargando juego...</p>
     </div>
     <iframe
+      ref="iframeEl"
       :src="src"
       :title="title"
       allow="fullscreen"

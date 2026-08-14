@@ -5,6 +5,7 @@ import { fetchGame } from '../api/games'
 import FullscreenButton from '../components/player/FullscreenButton.vue'
 import GameFrame from '../components/player/GameFrame.vue'
 import GameSidebar from '../components/player/GameSidebar.vue'
+import { useArcadiaBridge } from '../composables/useArcadiaBridge'
 import { usePlayer } from '../composables/usePlayer'
 import { usePlayTimer } from '../composables/usePlayTimer'
 
@@ -14,13 +15,23 @@ const router = useRouter()
 const game = ref(null)
 const loading = ref(true)
 const error = ref('')
+const gameFrame = ref(null)
 
 const { elapsedSeconds, start } = usePlayTimer()
 const player = usePlayer()
+const { sessionError } = player
 
 const iframeSrc = computed(() =>
   game.value ? game.value.filePath || `/uploads/games/${game.value.slug}/index.html` : ''
 )
+
+const allowedOrigin = computed(() => window.location.origin)
+
+const arcadiaBridge = useArcadiaBridge({
+  getFrame: () => gameFrame.value?.iframeEl,
+  getGameId: () => game.value?.id,
+  getAllowedOrigin: () => allowedOrigin.value
+})
 
 async function exit() {
   await player.finish()
@@ -32,6 +43,7 @@ onMounted(async () => {
     game.value = await fetchGame(route.params.slug)
     await player.begin(game.value.id)
     start()
+    arcadiaBridge.install()
   } catch {
     error.value = 'No se pudo cargar el juego.'
   } finally {
@@ -42,6 +54,7 @@ onMounted(async () => {
 
 onBeforeUnmount(() => {
   window.removeEventListener('pagehide', player.beaconFinish)
+  arcadiaBridge.uninstall()
   player.finish()
 })
 </script>
@@ -58,14 +71,14 @@ onBeforeUnmount(() => {
     <template v-else>
       <div class="player-main">
         <FullscreenButton>
-          <GameFrame :src="iframeSrc" :title="game.title" />
+          <GameFrame ref="gameFrame" :src="iframeSrc" :title="game.title" />
         </FullscreenButton>
       </div>
 
       <GameSidebar
         :game="game"
         :elapsed-seconds="elapsedSeconds"
-        :session-error="player.sessionError"
+        :session-error="sessionError"
         @exit="exit"
       />
     </template>
