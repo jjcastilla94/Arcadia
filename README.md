@@ -40,10 +40,11 @@ Prerrequisitos: [Docker Desktop](https://www.docker.com/products/docker-desktop/
 
 ```bash
 # 1. Base de datos (MySQL 8.4 en Docker) — aplica db/schema.sql la primera vez
-cp .env.example .env   # opcional: ajusta credenciales aquí
+cp .env.example .env   # ajusta credenciales y JWT_SECRET aquí (nunca se commitea .env)
 docker compose up -d
 
 # 2. Backend (Spring Boot) — http://localhost:8080
+# Lee las variables del .env de la raíz automáticamente (JWT_SECRET, DB_*, MYSQL_*)
 cd backend
 ./mvnw spring-boot:run
 

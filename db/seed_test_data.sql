@@ -61,6 +61,14 @@ INSERT IGNORE INTO games
      '/uploads/games/moto-rush/cover.png',
      (SELECT id FROM categories WHERE slug = 'carreras'), TRUE, FALSE, NOW(), NOW()),
 
+    ('Space Shooter',
+     'space-shooter',
+     'Dispara a meteoros y naves enemigas, esquiva sus impactos y sobrevive a las olas. ¿Cuál será tu mejor puntuación?',
+     '/uploads/games/space-shooter/index.html', 13689, '1.0',
+     '/uploads/games/space-shooter/thumbnail.png',
+     '/uploads/games/space-shooter/cover.png',
+     (SELECT id FROM categories WHERE slug = 'arcade'), TRUE, FALSE, NOW(), NOW()),
+
     -- Borrador: no aparece en el catálogo público (prueba del listado admin)
     ('Super Platformer',
      'super-platformer',
@@ -84,7 +92,8 @@ INSERT IGNORE INTO game_versions (game_id, version, file_path, release_notes, up
     ((SELECT id FROM games WHERE slug = 'snake-runner'),   '1.0', '/uploads/games/snake-runner/index.html',  'Primera versión', NOW()),
     ((SELECT id FROM games WHERE slug = 'puzzle-blocks'),  '1.0', '/uploads/games/puzzle-blocks/index.html', 'Versión inicial', DATE_SUB(NOW(), INTERVAL 7 DAY)),
     ((SELECT id FROM games WHERE slug = 'puzzle-blocks'),  '1.1', '/uploads/games/puzzle-blocks/index.html', 'Más parejas y contador de intentos', DATE_SUB(NOW(), INTERVAL 2 DAY)),
-    ((SELECT id FROM games WHERE slug = 'moto-rush'),      '1.0', '/uploads/games/moto-rush/index.html',     'Primera versión', NOW());
+    ((SELECT id FROM games WHERE slug = 'moto-rush'),      '1.0', '/uploads/games/moto-rush/index.html',     'Primera versión', NOW()),
+    ((SELECT id FROM games WHERE slug = 'space-shooter'),  '1.0', '/uploads/games/space-shooter/index.html', 'Primera versión', NOW());
 
 -- ------------------------------------------------------------
 -- IMÁGENES (galería estilo Steam)
@@ -93,7 +102,9 @@ INSERT IGNORE INTO game_images (game_id, image_url, position, created_at) VALUES
     ((SELECT id FROM games WHERE slug = 'snake-runner'),  '/uploads/games/snake-runner/cover.png',   0, NOW()),
     ((SELECT id FROM games WHERE slug = 'snake-runner'),  '/uploads/games/snake-runner/thumbnail.png', 1, NOW()),
     ((SELECT id FROM games WHERE slug = 'puzzle-blocks'), '/uploads/games/puzzle-blocks/cover.png',   0, NOW()),
-    ((SELECT id FROM games WHERE slug = 'moto-rush'),     '/uploads/games/moto-rush/cover.png',       0, NOW());
+    ((SELECT id FROM games WHERE slug = 'moto-rush'),     '/uploads/games/moto-rush/cover.png',       0, NOW()),
+    ((SELECT id FROM games WHERE slug = 'space-shooter'), '/uploads/games/space-shooter/cover.png',   0, NOW()),
+    ((SELECT id FROM games WHERE slug = 'space-shooter'), '/uploads/games/space-shooter/thumbnail.png', 1, NOW());
 
 -- ------------------------------------------------------------
 -- LOGROS
@@ -104,7 +115,11 @@ INSERT IGNORE INTO achievements (game_id, title, description, icon, points, hidd
     ((SELECT id FROM games WHERE slug = 'snake-runner'), 'Velocista',         'Supera 1 minuto de juego',  'zap',     50, FALSE),
     ((SELECT id FROM games WHERE slug = 'snake-runner'), 'Serpiente dorada',  'Logro secreto por puntuación legendaria', 'trophy', 100, TRUE),
     ((SELECT id FROM games WHERE slug = 'puzzle-blocks'),'Primera pareja',    'Encuentra tu primera pareja', 'heart',  10, FALSE),
-    ((SELECT id FROM games WHERE slug = 'puzzle-blocks'),'Memoria de elefante','Completa el tablero en menos de 30 intentos', 'brain', 50, TRUE);
+    ((SELECT id FROM games WHERE slug = 'puzzle-blocks'),'Memoria de elefante','Completa el tablero en menos de 30 intentos', 'brain', 50, TRUE),
+    ((SELECT id FROM games WHERE slug = 'space-shooter'),'Primer derribo',    'Destruye tu primer enemigo',  'rocket', 10, FALSE),
+    ((SELECT id FROM games WHERE slug = 'space-shooter'),'Primera ola',       'Supera la primera ola de enemigos', 'shield', 25, FALSE),
+    ((SELECT id FROM games WHERE slug = 'space-shooter'),'Cazador de meteoros','Destruye 10 meteoros en una partida', 'star', 50, FALSE),
+    ((SELECT id FROM games WHERE slug = 'space-shooter'),'Leyenda galáctica', 'Logro secreto: consigue 1000 puntos en una partida', 'trophy', 100, TRUE);
 
 -- ------------------------------------------------------------
 -- BIBLIOTECA PERSONAL
@@ -165,7 +180,13 @@ INSERT IGNORE INTO play_sessions (user_id, game_id, started_at, ended_at, durati
      DATE_SUB(NOW(), INTERVAL 3 DAY), DATE_SUB(NOW(), INTERVAL 3 DAY), 2400),
     ((SELECT id FROM users WHERE nickname = 'gamer2'),
      (SELECT id FROM games WHERE slug = 'moto-rush'),
-     DATE_SUB(NOW(), INTERVAL 2 DAY), DATE_SUB(NOW(), INTERVAL 2 DAY), 1200);
+     DATE_SUB(NOW(), INTERVAL 2 DAY), DATE_SUB(NOW(), INTERVAL 2 DAY), 1200),
+    ((SELECT id FROM users WHERE nickname = 'gamer1'),
+     (SELECT id FROM games WHERE slug = 'space-shooter'),
+     DATE_SUB(NOW(), INTERVAL 2 HOUR), NOW(), 900),
+    ((SELECT id FROM users WHERE nickname = 'gamer2'),
+     (SELECT id FROM games WHERE slug = 'space-shooter'),
+     DATE_SUB(NOW(), INTERVAL 5 HOUR), NOW(), 1500);
 
 -- ------------------------------------------------------------
 -- LOGROS DESBLOQUEADOS
