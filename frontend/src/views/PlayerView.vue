@@ -15,7 +15,7 @@ const game = ref(null)
 const loading = ref(true)
 const error = ref('')
 
-const timer = usePlayTimer()
+const { elapsedSeconds, start } = usePlayTimer()
 const player = usePlayer()
 
 const iframeSrc = computed(() =>
@@ -31,7 +31,7 @@ onMounted(async () => {
   try {
     game.value = await fetchGame(route.params.slug)
     await player.begin(game.value.id)
-    timer.start()
+    start()
   } catch {
     error.value = 'No se pudo cargar el juego.'
   } finally {
@@ -64,7 +64,7 @@ onBeforeUnmount(() => {
 
       <GameSidebar
         :game="game"
-        :elapsed-seconds="timer.elapsedSeconds"
+        :elapsed-seconds="elapsedSeconds"
         :session-error="player.sessionError"
         @exit="exit"
       />
