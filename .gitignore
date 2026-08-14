@@ -17,5 +17,8 @@ frontend/dist/
 # Ficheros subidos localmente
 uploads/
 
+# Archivos de prueba
+samples/
+
 # Logs
 *.log
