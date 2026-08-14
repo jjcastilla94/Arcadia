@@ -8,11 +8,11 @@
 ```
 Cliente                          Backend (Spring Boot)                  Datos
 ──────────────────────────────   ───────────────────────────────────   ──────────────────────────
-Frontend Vue 3 (Fase 1)   ───▶   auth / user / security / common   ─▶   Spring Data JPA   ─▶   MySQL 8.4 (Docker)
+Frontend Vue 3             ───▶   auth / user / security / common   ─▶   Spring Data JPA   ─▶   MySQL 8.4 (Docker)
 DBeaver (JDBC directo)    ──────────────────────────────────────────▶   localhost:3306 · BD arcadia
 ```
 
-- El **frontend** (futuro, Vue 3 + Vite) se comunica con el backend por **HTTP + JWT**.
+- El **frontend** (Vue 3 + Vite) se comunica con el backend por **HTTP + JWT**.
 - **DBeaver** (y cualquier cliente SQL) se conecta **directamente** a MySQL por el puerto `3306`.
 - El backend solo conoce la URL de JDBC `jdbc:mysql://localhost:3306/arcadia`; no sabe que MySQL corre en Docker.
 
@@ -22,6 +22,7 @@ DBeaver (JDBC directo)    ──────────────────
 | --- | --- | --- |
 | `auth` | `com.arcadia.auth` | Registro, login y refresh de tokens (`AuthController`, `AuthService`, DTOs, `UserMapper`) |
 | `user` | `com.arcadia.user` | Perfil del usuario autenticado (`GET /api/users/me`) |
+| `progress` | `com.arcadia.progress` | Cloud saves por usuario (`POST /api/progress/save`, `GET /api/progress/{gameId}`, tabla `saved_games`) |
 | `security` | `com.arcadia.security` | `SecurityConfig`, `JwtService`, `JwtAuthenticationFilter`, `CustomUserDetails` |
 | `config` | `com.arcadia.config` | `CorsConfig`, `OpenApiConfig` (Swagger) |
 | `common` | `com.arcadia.common` | `ApiResponse`, `ErrorResponse`, `GlobalExceptionHandler`, excepciones y utilidades |
@@ -65,6 +66,24 @@ flowchart LR
 2. `JwtAuthenticationFilter` intercepta cada petición, valida el `access` token y rellena el `SecurityContext`.
 3. `CustomUserDetails` expone el `User` autenticado a los controladores (`@AuthenticationPrincipal`).
 4. `POST /api/auth/refresh` rota el `refresh` token (tabla `refresh_tokens`).
+
+## Flujo de Cloud Save y Arcadia.js (Fase 4)
+
+El juego HTML5 se ejecuta en un `<iframe>` dentro del reproductor (`PlayerView.vue`) y se comunica con la web por `window.postMessage`. La web es la única que habla con el backend:
+
+```
+Juego (iframe)                 PlayerView (web)                    Backend
+─────────────                  ─────────────────                   ───────
+Arcadia.save(data) ──postMessage──▶  useArcadiaBridge ──HTTP POST──▶  /api/progress/save
+ARCADIA_SAVE {messageId}        │  valida origin + estructura     │  (upsert en saved_games)
+      ◀──postMessage───────────────┤  response {success, data}      │
+Arcadia.getSave() ──postMessage──▶  useArcadiaBridge ──HTTP GET───▶  /api/progress/{gameId}
+ARCADIA_GET_SAVE {messageId}     │  (404 → data null)              │
+```
+
+- El SDK `arcadia.js` se sirve como recurso estático en `/arcadia.js` (sin autenticación) y expone `Arcadia.save(data)` / `Arcadia.getSave()`, que devuelven Promises con timeout de 10s.
+- La web responde solo a mensajes del propio iframe (`event.source`), del origen permitido (`event.origin`) y con `messageId` y estructura válidos.
+- La tabla `saved_games` usa clave primaria compuesta `(user_id, game_id)`, por lo que cada usuario tiene su propia partida por juego y el acceso a la de otro usuario da 404.
 
 ## Infraestructura
 

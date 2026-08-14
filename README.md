@@ -98,7 +98,7 @@ npm run dev
 FASE 1  ✅  Proyecto base, JWT y Usuarios  *(completada)*
 FASE 2  ✅  Catálogo, Admin, Biblioteca y Perfil  *(completada)*
 FASE 3  ✅  Player y Sesiones de Juego  *(completada)*
-FASE 4  ➜  Cloud Save + Arcadia.js
+FASE 4  ✅  Cloud Save + Arcadia.js  *(completada)*
 FASE 5  ➜  Sistema de Logros
 FASE 6  ➜  Favoritos y Reseñas
 FASE 7  ➜  Perfil avanzado y Pulido
@@ -187,24 +187,34 @@ FASE 9  ➜  Despliegue y Producción
 > **Objetivo:** conectar el iframe con la app para guardar partidas automáticamente y formalizar el SDK para juegos.
 
 **Intercomunicación Juego ➔ Web (JavaScript `window.postMessage`)**
-- Evento `SAVE_DATA`: guardar progreso.
-- Evento `LOAD_DATA`: recuperar la partida guardada.
+- Protocolo request/response con `messageId`: el juego envía `ARCADIA_SAVE` / `ARCADIA_GET_SAVE` y la web responde `ARCADIA_SAVE_RESPONSE` / `ARCADIA_GET_SAVE_RESPONSE` con `success`, `data` o `error`.
+- El reproductor valida `event.source` (el iframe del juego), `event.origin` y la estructura del mensaje antes de tocar la API.
 
 **Backend (Spring Boot)**
-- Tabla `saved_games` con JSON (`{ level, coins, weapons }`).
-- Endpoints:
-  - `POST /api/progress/save`
-  - `GET /api/progress/{gameId}`
+- Tabla `saved_games` con clave primaria compuesta `(user_id, game_id)`, columna `data` JSON y `updated_at`.
+- Endpoints (módulo `progress`):
+  - `POST /api/progress/save` — guarda o actualiza (upsert) la partida.
+  - `GET /api/progress/{gameId}` — devuelve la partida o 404 si aún no existe.
 
 **SDK Arcadia.js**
-- Librería JavaScript para que los juegos se integren sin conocer el protocolo interno:
-  - `Arcadia.save(data)` → `SAVE_DATA`
-  - `Arcadia.getSave()` → `LOAD_DATA`
-  - `Arcadia.unlock(id)` → logros (FASE 5)
-  - `Arcadia.getUser()` → usuario autenticado
+- Librería JavaScript servida como recurso estático del backend en `/arcadia.js` (permitida en `SecurityConfig` y proxeada por Vite en desarrollo).
+- API pública actual (devuelve Promises con timeout de 10s):
+  - `Arcadia.save(data)` → envía `ARCADIA_SAVE`
+  - `Arcadia.getSave()` → envía `ARCADIA_GET_SAVE`
+  - `Arcadia.unlock(id)` (logros) y `Arcadia.getUser()` llegarán en las fases 5-6.
 
 **Frontend (Vue 3 + Vite)**
-- Escuchador de eventos `window.addEventListener('message', ...)` en el reproductor, con validación de origen y estructura.
+- `useArcadiaBridge.js` en el reproductor: escucha `window.addEventListener('message', ...)`, valida origen y estructura, y traduce los mensajes a llamadas HTTP de la API de progreso.
+
+**✅ Estado: FASE 4 COMPLETADA**
+
+| Área | Implementado |
+| --- | --- |
+| **Cloud Save API** | `POST /api/progress/save` (upsert) y `GET /api/progress/{gameId}` con la tabla `saved_games` (PK `user_id + game_id`) y aislamiento de datos por usuario |
+| **SDK Arcadia.js** | Recurso estático `/arcadia.js` con `Arcadia.save(data)` y `Arcadia.getSave()`: Promises resueltas por `messageId`, timeout de 10s y export también para módulos |
+| **Puente postMessage** | `useArcadiaBridge.js`: protocolo `ARCADIA_SAVE/GET_SAVE` ↔ `*_RESPONSE`, validación de `event.source`, `event.origin` y estructura (JSON object/array) |
+| **Seguridad** | Solo juegos publicados y no ocultos (404 si no); anónimo → 401; la partida de otro usuario devuelve 404 |
+| **Validación** | Test de integración `ProgressFlowIntegrationTest` (crear, leer, actualizar, ownership, 400/401/404) — suite completa `mvn test`: 4 suites, 4 tests OK |
 
 ### 🏆 FASE 5: Sistema de Logros
 
@@ -268,14 +278,14 @@ FASE 9  ➜  Despliegue y Producción
 
 ## 🎁 Extra: SDK para Juegos *(Arcadia.js)*
 
-Una pequeña librería JavaScript para que los propios juegos se integren con Arcadia sin conocer el protocolo interno:
+Una pequeña librería JavaScript para que los propios juegos se integren con Arcadia sin conocer el protocolo interno (incorporada en la FASE 4):
 
 ```js
-Arcadia.save({ level: 4, coins: 120 });
-Arcadia.unlock("first-boss");
-Arcadia.getSave();
-Arcadia.getUser();
+await Arcadia.save({ level: 4, coins: 120 });
+const save = await Arcadia.getSave();
 ```
+
+`Arcadia.save(data)` y `Arcadia.getSave()` devuelven Promises que se resuelven cuando la web responde (con un timeout de 10s). En las fases 5-6 llegarán `Arcadia.unlock(id)` para logros y `Arcadia.getUser()` para los datos del usuario autenticado.
 
 Internamente usa `window.postMessage`, pero para el desarrollador del juego la integración es trivial. Esto convierte a **Arcadia en una plataforma**, no solo en una web que incrusta juegos.
 
@@ -295,6 +305,7 @@ backend
 ├── user            # Perfil autenticado (GET/PUT /api/users/me)
 ├── game            # Catálogo público y detalle (GET /api/games, GET /api/games/{slug})
 ├── library         # Biblioteca personal (GET/POST/DELETE /api/library)
+├── progress        # Cloud saves por usuario (POST /api/progress/save, GET /api/progress/{gameId})
 ├── session         # Sesiones de juego (POST /api/play-sessions/start|end)
 ├── storage         # StorageService: descompresión de ZIP y servir uploads/
 ├── security        # SecurityConfig, JwtService, JwtAuthenticationFilter, CustomUserDetails
@@ -304,7 +315,7 @@ backend
 └── repository      # Repositorios Spring Data JPA
 ```
 
-> Los módulos de `admin`, `game`, `category`, `library`, `session`, `storage` y `user` ya están incorporados (fases 1-2). Los módulos de `achievement`, `review`, `favorite` y `sdk` se incorporarán en las fases 4-6 del roadmap.
+> Los módulos de `admin`, `game`, `category`, `library`, `session`, `storage`, `user` y `progress` ya están incorporados (fases 1-4). Los módulos de `achievement`, `review`, `favorite` y `sdk` se incorporarán en las fases 5-6 del roadmap.
 
 Diagrama entidad-relación de la base de datos: [`docs/arcadia_entidad_relacion.png`](docs/arcadia_entidad_relacion.png).
 
