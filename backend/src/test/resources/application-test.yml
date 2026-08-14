@@ -12,4 +12,4 @@ spring:
 
 app:
   jwt:
-    secret: test-secret-para-integracion-no-usar-en-produccion
+    secret: hETXdRSiy0W0VEcCjP3U2nRFVGPjpHlOLFAobwWEA7s=
